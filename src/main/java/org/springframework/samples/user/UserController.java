@@ -1,13 +1,11 @@
-
 package org.springframework.samples.petclinic.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.samples.petclinic.user.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map; // Añadir esta importación
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -25,7 +23,7 @@ public class UserController {
 		String username = loginRequest.get("username");
 		String password = loginRequest.get("password");
 
-		User foundUser = userRepository.findByUsernameAndPassword(username, password);
+		User foundUser = userRepository.findByUsernameAndPassword(username, password).orElse(null);
 		if (foundUser != null) {
 			// Autenticación exitosa, devolver el usuario autenticado
 			return ResponseEntity.ok(foundUser);
@@ -42,8 +40,7 @@ public class UserController {
 		String password = registerRequest.get("password");
 
 		// Verificar si el usuario ya existe
-		User existingUser = userRepository.findByUsername(username);
-		if (existingUser != null) {
+		if (userRepository.findByUsername(username).isPresent()) {
 			// El usuario ya existe, devolver un mensaje de error
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username already exists");
 		}
@@ -55,6 +52,18 @@ public class UserController {
 			userRepository.save(newUser);
 			// Registro exitoso, devolver el usuario registrado
 			return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
+		}
+	}
+
+	@GetMapping("/check-db-connection")
+	public ResponseEntity<?> checkDatabaseConnection() {
+		try {
+			long userCount = userRepository.count();
+			return ResponseEntity.ok("Database connection successful. User count: " + userCount);
+		}
+		catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+				.body("Database connection failed: " + e.getMessage());
 		}
 	}
 
