@@ -21,6 +21,7 @@ import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.samples.petclinic.model.BaseEntity;
 import org.springframework.samples.petclinic.model.Person;
 import org.springframework.samples.petclinic.vet.Vet;
+import org.springframework.samples.petclinic.user.User;
 
 public class PetClinicRuntimeHints implements RuntimeHintsRegistrar {
 
@@ -33,6 +34,7 @@ public class PetClinicRuntimeHints implements RuntimeHintsRegistrar {
 		hints.serialization().registerType(BaseEntity.class);
 		hints.serialization().registerType(Person.class);
 		hints.serialization().registerType(Vet.class);
+		hints.serialization().registerType(User.class);
 	}
 
 }

@@ -16,15 +16,29 @@
 
 package org.springframework.samples.petclinic.system;
 
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
-class WelcomeController {
+@RestController
+public class WelcomeController {
 
 	@GetMapping("/")
-	public String welcome() {
-		return "welcome";
+	public WelcomeMessage welcome() {
+		return new WelcomeMessage("Welcome to PetClinic API");
+	}
+
+	public static class WelcomeMessage {
+
+		private final String message;
+
+		public WelcomeMessage(String message) {
+			this.message = message;
+		}
+
+		public String getMessage() {
+			return message;
+		}
+
 	}
 
 }
