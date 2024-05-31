@@ -7,7 +7,7 @@ import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional; // Importación necesaria
+import java.util.Optional;
 
 /**
  * Repository class for <code>User</code> domain objects. All method names are compliant
@@ -34,7 +34,7 @@ public interface UserRepository extends Repository<User, Integer> {
 	 */
 	@Query("SELECT user FROM User user WHERE user.id = :id")
 	@Transactional(readOnly = true)
-	Optional<User> findById(@Param("id") Integer id); // Corregido para usar Optional
+	Optional<User> findById(@Param("id") Integer id);
 
 	/**
 	 * Save a {@link User} to the data store, either inserting or updating it.
@@ -48,5 +48,14 @@ public interface UserRepository extends Repository<User, Integer> {
 	@Query("SELECT user FROM User user")
 	@Transactional(readOnly = true)
 	Page<User> findAll(Pageable pageable);
+
+	/**
+	 * Retrieve a {@link User} from the data store by username.
+	 * @param username the username to search for
+	 * @return an Optional containing the {@link User} if found
+	 */
+	@Query("SELECT user FROM User user WHERE user.username = :username")
+	@Transactional(readOnly = true)
+	Optional<User> findByUsername(@Param("username") String username);
 
 }

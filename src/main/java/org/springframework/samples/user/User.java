@@ -2,6 +2,8 @@ package org.springframework.samples.petclinic.user;
 
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.samples.petclinic.model.BaseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.Assert;
 
 import jakarta.persistence.Column;
@@ -10,6 +12,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import java.util.UUID;
 
 /**
  * Simple JavaBean domain object representing a user.
@@ -44,6 +47,9 @@ public class User extends BaseEntity {
 	@Email
 	private String email;
 
+	// Password encoder to encode and match passwords
+	private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
 	public String getUsername() {
 		return username;
 	}
@@ -73,7 +79,7 @@ public class User extends BaseEntity {
 	}
 
 	public void setPassword(String password) {
-		this.password = password;
+		this.password = passwordEncoder.encode(password);
 	}
 
 	public String getAuthToken() {
@@ -104,17 +110,22 @@ public class User extends BaseEntity {
 	}
 
 	/**
-	 * Validate the user's password and authToken.
+	 * Validate the user's password.
 	 * @param password the password to validate, must not be {@literal null}.
-	 * @param authToken the authToken to validate, must not be {@literal null}.
 	 */
-	public void validateCredentials(String password, String authToken) {
+	public void validatePassword(String password) {
 		Assert.notNull(password, "Password must not be null!");
-		Assert.notNull(authToken, "Auth token must not be null!");
-
-		if (!this.password.equals(password)) {
+		if (!passwordEncoder.matches(password, this.password)) {
 			throw new IllegalArgumentException("Invalid password!");
 		}
+	}
+
+	/**
+	 * Validate the user's authToken.
+	 * @param authToken the authToken to validate, must not be {@literal null}.
+	 */
+	public void validateAuthToken(String authToken) {
+		Assert.notNull(authToken, "Auth token must not be null!");
 		if (!this.authToken.equals(authToken)) {
 			throw new IllegalArgumentException("Invalid auth token!");
 		}

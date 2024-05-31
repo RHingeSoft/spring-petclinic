@@ -10,6 +10,8 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import jakarta.validation.Valid;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * REST controller for managing user registrations.
@@ -36,15 +38,40 @@ class UserController {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Validation errors");
 		}
 
-		User savedUser = userRepository.save(user); // Este es el método que debería
-													// devolver un usuario guardado
+		User savedUser = userRepository.save(user);
 
 		return ResponseEntity
 			.created(ServletUriComponentsBuilder.fromCurrentRequest()
 				.path("/{id}")
-				.buildAndExpand(savedUser.getId()) // Usar el usuario guardado
+				.buildAndExpand(savedUser.getId())
 				.toUri())
-			.body(savedUser); // Devolver el usuario guardado
+			.body(savedUser);
+	}
+
+	@PostMapping("/login")
+	public ResponseEntity<User> loginUser(@RequestBody Map<String, String> credentials) {
+		String username = credentials.get("username");
+		String password = credentials.get("password");
+
+		if (username == null || password == null) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username and password must be provided");
+		}
+
+		Optional<User> optionalUser = userRepository.findByUsername(username);
+		if (optionalUser.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid username or password");
+		}
+
+		User user = optionalUser.get();
+
+		try {
+			user.validatePassword(password);
+		}
+		catch (IllegalArgumentException e) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid username or password");
+		}
+
+		return ResponseEntity.ok(user);
 	}
 
 }
