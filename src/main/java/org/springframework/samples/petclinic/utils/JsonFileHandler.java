@@ -20,7 +20,7 @@ public class JsonFileHandler {
 		// Constructor vacío
 	}
 
-	public List<Map<String, Object>> readEmployees(String filePath) throws IOException {
+	public List<Map<String, Object>> readFile(String filePath) throws IOException {
 		File file = new File(filePath);
 		if (file.exists() && !file.isDirectory()) {
 			return objectMapper.readValue(file, new TypeReference<List<Map<String, Object>>>() {
@@ -31,15 +31,15 @@ public class JsonFileHandler {
 		}
 	}
 
-	public void writeEmployees(List<Map<String, Object>> employees, String filePath) throws IOException {
-		objectMapper.writeValue(new File(filePath), employees);
+	public void writeFile(List<Map<String, Object>> element, String filePath) throws IOException {
+		objectMapper.writeValue(new File(filePath), element);
 	}
 
 	public Optional<Map<String, Object>> findById(Integer id, String filePath) throws IOException {
-		List<Map<String, Object>> employees = readEmployees(filePath);
-		for (Map<String, Object> employee : employees) {
-			if (employee.get("id").equals(id)) {
-				return Optional.of(employee);
+		List<Map<String, Object>> element = readFile(filePath);
+		for (Map<String, Object> elements : element) {
+			if (elements.get("id").equals(id)) {
+				return Optional.of(elements);
 			}
 		}
 		return Optional.empty();

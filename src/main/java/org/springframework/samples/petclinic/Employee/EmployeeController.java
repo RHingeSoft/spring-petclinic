@@ -32,11 +32,11 @@ class EmployeeController {
 	@PostMapping
 	public ResponseEntity<Map<String, Object>> createEmployee(@Valid @RequestBody Map<String, Object> employee) {
 		try {
-			List<Map<String, Object>> employees = jsonFileHandler.readEmployees(filePath);
+			List<Map<String, Object>> employees = jsonFileHandler.readFile(filePath);
 			// debe asignar un id único al empleado
 			employee.put("id", employees.size() + 1);
 			employees.add(employee);
-			jsonFileHandler.writeEmployees(employees, filePath);
+			jsonFileHandler.writeFile(employees, filePath);
 			return ResponseEntity.ok(employee);
 		}
 		catch (IOException e) {
@@ -65,7 +65,7 @@ class EmployeeController {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Validation errors");
 		}
 		try {
-			List<Map<String, Object>> employees = jsonFileHandler.readEmployees(filePath);
+			List<Map<String, Object>> employees = jsonFileHandler.readFile(filePath);
 			Optional<Map<String, Object>> optionalEmployee = employees.stream()
 				.filter(e -> e.get("id").equals(id))
 				.findFirst();
@@ -76,7 +76,7 @@ class EmployeeController {
 			Map<String, Object> existingEmployee = optionalEmployee.get();
 			existingEmployee.putAll(employeeDetails);
 
-			jsonFileHandler.writeEmployees(employees, filePath);
+			jsonFileHandler.writeFile(employees, filePath);
 			return ResponseEntity.ok(existingEmployee);
 		}
 		catch (IOException e) {
@@ -87,12 +87,12 @@ class EmployeeController {
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteEmployee(@PathVariable Integer id) {
 		try {
-			List<Map<String, Object>> employees = jsonFileHandler.readEmployees(filePath);
+			List<Map<String, Object>> employees = jsonFileHandler.readFile(filePath);
 			boolean removed = employees.removeIf(e -> e.get("id").equals(id));
 			if (!removed) {
 				throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found");
 			}
-			jsonFileHandler.writeEmployees(employees, filePath);
+			jsonFileHandler.writeFile(employees, filePath);
 			return ResponseEntity.noContent().build();
 		}
 		catch (IOException e) {
@@ -103,7 +103,7 @@ class EmployeeController {
 	@GetMapping("/")
 	public ResponseEntity<List<Map<String, Object>>> getAllEmployees() {
 		try {
-			List<Map<String, Object>> employees = jsonFileHandler.readEmployees(filePath);
+			List<Map<String, Object>> employees = jsonFileHandler.readFile(filePath);
 			return ResponseEntity.ok(employees);
 		}
 		catch (IOException e) {
