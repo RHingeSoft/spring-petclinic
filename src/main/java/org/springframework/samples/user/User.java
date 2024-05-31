@@ -12,6 +12,11 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import java.util.Arrays;
+import jakarta.persistence.ElementCollection;
+import java.util.Set;
+import java.util.HashSet;
+
 import java.util.UUID;
 
 /**
@@ -39,13 +44,17 @@ public class User extends BaseEntity {
 	@Size(min = 8)
 	private String password;
 
-	@Column(name = "auth_token")
+	@Column(name = "auth_token", unique = true)
 	private String authToken;
 
 	@Column(name = "email", unique = true)
 	@NotBlank
 	@Email
 	private String email;
+
+	@Column(name = "roles")
+	@ElementCollection(targetClass = String.class)
+	private Set<String> roles = new HashSet<>();
 
 	// Password encoder to encode and match passwords
 	private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -86,6 +95,12 @@ public class User extends BaseEntity {
 		return authToken;
 	}
 
+	public Set<String> getRoles() {
+		Set<String> roles = new HashSet<>();
+		roles.add("ADMIN");
+		return roles;
+	}
+
 	public void setAuthToken(String authToken) {
 		this.authToken = authToken;
 	}
@@ -106,6 +121,7 @@ public class User extends BaseEntity {
 			.append("firstName", this.firstName)
 			.append("lastName", this.lastName)
 			.append("email", this.email)
+			.append("roles", this.roles)
 			.toString();
 	}
 
@@ -129,6 +145,13 @@ public class User extends BaseEntity {
 		if (!this.authToken.equals(authToken)) {
 			throw new IllegalArgumentException("Invalid auth token!");
 		}
+	}
+
+	/**
+	 * Generate a new authentication token for the user.
+	 */
+	public void generateAuthToken() {
+		this.authToken = UUID.randomUUID().toString();
 	}
 
 }

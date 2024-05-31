@@ -58,4 +58,14 @@ public interface UserRepository extends Repository<User, Integer> {
 	@Transactional(readOnly = true)
 	Optional<User> findByUsername(@Param("username") String username);
 
+	/**
+	 * Retrieve a {@link User} from the data store by username.
+	 * @param email the username to search for
+	 * @return an Optional containing the {@link User} if found
+	 */
+
+	@Query("SELECT user FROM User user WHERE user.email = :email")
+	@Transactional(readOnly = true)
+	Optional<User> findByEmail(@Param("email") String email);
+
 }
