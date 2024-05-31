@@ -1,0 +1,21 @@
+<!-- Un templeta de un correo el cual es para decirle a una entidad (empresa llamada SURA) que se va a inscribir alguien a seguridad social datos de entrada:
+name
+lastName
+cargo -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Correo de inscripción a seguridad social</title>
+</head>
+
+<body>
+    <h1>Estimados de SURA</h1>
+    <p>Se les informa que el empleado <strong th:text="${name}">Nombre</strong> <strong
+            th:text="${lastName}">Apellido</strong> se va a inscribir a seguridad social con el cargo de <strong
+            th:text="${cargo}">Cargo</strong></p>
+</body>
+
+</html>

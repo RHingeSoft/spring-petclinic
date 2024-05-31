@@ -1,1 +1,12 @@
-[{"username":"VARCHAR(50)","first_name":"VARCHAR(30)","last_name":"VARCHAR(30)","cargo":"VARCHAR(30)","salario_base":"FLOAT(32)","tipo_contrato":"VARCHAR(100)","lista_de_proyectos":"VARCHAR(255)","id":2}]
+[
+    {
+        "username": "VARCHAR(50)",
+        "first_name": "VARCHAR(30)",
+        "last_name": "VARCHAR(30)",
+        "cargo": "VARCHAR(30)",
+        "salario_base": "FLOAT(32)",
+        "tipo_contrato": "VARCHAR(100)",
+        "lista_de_proyectos": "VARCHAR(255)",
+        "id": 2
+    }
+]
