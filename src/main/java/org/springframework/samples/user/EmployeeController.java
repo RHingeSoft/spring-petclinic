@@ -3,27 +3,26 @@ package org.springframework.samples.petclinic.employee;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.samples.petclinic.utils.JsonFileHandler;
 import jakarta.validation.Valid;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/employees")
 class EmployeeController {
 
-	private final EmployeeRepository employeeRepository;
+	private final String filePath = "src/main/resources/db/JSON/Employees.json";
 
 	@Autowired
-	public EmployeeController(EmployeeRepository employeeRepository) {
-		this.employeeRepository = employeeRepository;
-	}
+	private JsonFileHandler jsonFileHandler;
 
 	@InitBinder
 	public void setAllowedFields(WebDataBinder dataBinder) {
@@ -31,81 +30,85 @@ class EmployeeController {
 	}
 
 	@PostMapping
-	public ResponseEntity<String> createEmployee() {
-		// @Valid @RequestBody Employee employee, BindingResult result
-		// if (result.hasErrors()) {
-		// throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Validation errors");
-		// }
-		Employee employee = new Employee();
-		employee.setUsername("jdoe");
-		employee.setFirstName("John");
-		employee.setLastName("Doe");
-		employee.setCargo("Developer");
-		employee.setSalarioBase(50000);
-		employee.setTipoContrato("Full-time");
-		employee.setListaDeProyectos("Project A, Project B");
-
-		// // Guardar el empleado en el repositorio
-		//// Employee savedEmployee = employeeRepository.save(employee);
-
-		// Devolver la respuesta con el estado 201 Created y la URI del nuevo recurso
-		// return ResponseEntity
-		// .created(ServletUriComponentsBuilder.fromCurrentRequest()
-		// .path("/{id}")
-		// .buildAndExpand(savedEmployee.getId())
-		// .toUri())
-		// .body(savedEmployee);
-		return ResponseEntity.ok("OK");
+	public ResponseEntity<Map<String, Object>> createEmployee(@Valid @RequestBody Map<String, Object> employee) {
+		try {
+			List<Map<String, Object>> employees = jsonFileHandler.readEmployees(filePath);
+			// debe asignar un id único al empleado
+			employee.put("id", employees.size() + 1);
+			employees.add(employee);
+			jsonFileHandler.writeEmployees(employees, filePath);
+			return ResponseEntity.ok(employee);
+		}
+		catch (IOException e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error writing to file", e);
+		}
 	}
 
-	// @GetMapping("/{id}")
-	// public ResponseEntity<Employee> getEmployeeById(@PathVariable Integer id) {
-	// Optional<Employee> employee = employeeRepository.findById(id);
-	// if (employee.isEmpty()) {
-	// throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found");
-	// }
-	// return ResponseEntity.ok(employee.get());
-	// }
+	@GetMapping("/{id}")
+	public ResponseEntity<Map<String, Object>> getEmployeeById(@PathVariable Integer id) {
+		try {
+			Optional<Map<String, Object>> employee = jsonFileHandler.findById(id, filePath);
+			if (employee.isEmpty()) {
+				throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found");
+			}
+			return ResponseEntity.ok(employee.get());
+		}
+		catch (IOException e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error reading from file", e);
+		}
+	}
 
-	// @PutMapping("/{id}")
-	// public ResponseEntity<Employee> updateEmployee(@PathVariable Integer id,
-	// @Valid @RequestBody Employee employeeDetails, BindingResult result) {
-	// if (result.hasErrors()) {
-	// throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Validation errors");
-	// }
-	// Optional<Employee> optionalEmployee = employeeRepository.findById(id);
-	// if (optionalEmployee.isEmpty()) {
-	// throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found");
-	// }
+	@PutMapping("/{id}")
+	public ResponseEntity<Map<String, Object>> updateEmployee(@PathVariable Integer id,
+			@Valid @RequestBody Map<String, Object> employeeDetails, BindingResult result) {
+		if (result.hasErrors()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Validation errors");
+		}
+		try {
+			List<Map<String, Object>> employees = jsonFileHandler.readEmployees(filePath);
+			Optional<Map<String, Object>> optionalEmployee = employees.stream()
+				.filter(e -> e.get("id").equals(id))
+				.findFirst();
+			if (optionalEmployee.isEmpty()) {
+				throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found");
+			}
 
-	// Employee existingEmployee = optionalEmployee.get();
-	// existingEmployee.setUsername(employeeDetails.getUsername());
-	// existingEmployee.setFirstName(employeeDetails.getFirstName());
-	// existingEmployee.setLastName(employeeDetails.getLastName());
-	// existingEmployee.setCargo(employeeDetails.getCargo());
-	// existingEmployee.setSalarioBase(employeeDetails.getSalarioBase());
-	// existingEmployee.setTipoContrato(employeeDetails.getTipoContrato());
-	// existingEmployee.setListaDeProyectos(employeeDetails.getListaDeProyectos());
+			Map<String, Object> existingEmployee = optionalEmployee.get();
+			existingEmployee.putAll(employeeDetails);
 
-	// Employee updatedEmployee = employeeRepository.save(existingEmployee);
-	// return ResponseEntity.ok(updatedEmployee);
-	// }
+			jsonFileHandler.writeEmployees(employees, filePath);
+			return ResponseEntity.ok(existingEmployee);
+		}
+		catch (IOException e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error writing to file", e);
+		}
+	}
 
-	// @DeleteMapping("/{id}")
-	// public ResponseEntity<Employee> deleteEmployee(@PathVariable Integer id) {
-	// Optional<Employee> optionalEmployee = employeeRepository.findById(id);
-	// if (optionalEmployee.isEmpty()) {
-	// throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found");
-	// }
-	// employeeRepository.deleteById(id);
-	// return ResponseEntity.noContent().build();
-	// }
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> deleteEmployee(@PathVariable Integer id) {
+		try {
+			List<Map<String, Object>> employees = jsonFileHandler.readEmployees(filePath);
+			boolean removed = employees.removeIf(e -> e.get("id").equals(id));
+			if (!removed) {
+				throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found");
+			}
+			jsonFileHandler.writeEmployees(employees, filePath);
+			return ResponseEntity.noContent().build();
+		}
+		catch (IOException e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error writing to file", e);
+		}
+	}
 
-	// @GetMapping("/")
-	// // *Este mentodo trea todos*/
-	// public ResponseEntity<Page<Employee>> getAllEmployees(Pageable pageable) {
-	// Page<Employee> employees = employeeRepository.findAll(pageable);
-	// return ResponseEntity.ok(employees);
-	// }
+	@GetMapping("/")
+	public ResponseEntity<List<Map<String, Object>>> getAllEmployees() {
+		try {
+			List<Map<String, Object>> employees = jsonFileHandler.readEmployees(filePath);
+			return ResponseEntity.ok(employees);
+		}
+		catch (IOException e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error reading from file", e);
+		}
+	}
 
 }
