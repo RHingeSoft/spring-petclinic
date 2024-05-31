@@ -8,6 +8,8 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import java.util.Set;
+import java.util.HashSet;
 
 import jakarta.validation.Valid;
 import java.util.Map;
@@ -32,12 +34,14 @@ class UserController {
 		dataBinder.setDisallowedFields("id");
 	}
 
-	@PostMapping
+	@PostMapping("/register")
 	public ResponseEntity<User> createUser(@Valid @RequestBody User user, BindingResult result) {
 		if (result.hasErrors()) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Validation errors");
 		}
 
+		user.generateAuthToken(); // Genera un token de autenticación para el nuevo
+									// usuario
 		User savedUser = userRepository.save(user);
 
 		return ResponseEntity
@@ -50,14 +54,14 @@ class UserController {
 
 	@PostMapping("/login")
 	public ResponseEntity<User> loginUser(@RequestBody Map<String, String> credentials) {
-		String username = credentials.get("username");
+		String email = credentials.get("email");
 		String password = credentials.get("password");
 
-		if (username == null || password == null) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username and password must be provided");
+		if (email == null || password == null) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "email and password must be provided");
 		}
 
-		Optional<User> optionalUser = userRepository.findByUsername(username);
+		Optional<User> optionalUser = userRepository.findByEmail(email);
 		if (optionalUser.isEmpty()) {
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid username or password");
 		}
