@@ -73,7 +73,8 @@ CREATE TABLE users (
   last_name  VARCHAR_IGNORECASE(30),
   password   VARCHAR(255),
   auth_token VARCHAR(255),
-  email      VARCHAR(100) UNIQUE
+  email      VARCHAR(100) UNIQUE,
+  roles VARCHAR(255) DEFAULT '["ADMIN"]'
 );
 CREATE INDEX users_last_name ON users (last_name);
 
