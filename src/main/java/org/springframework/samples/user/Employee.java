@@ -19,6 +19,7 @@ import jakarta.validation.constraints.Size;
 import java.util.UUID;
 
 @Entity
+@Table(name = "employees")
 public class Employee extends BaseEntity {
 
 	@Column(length = 50)

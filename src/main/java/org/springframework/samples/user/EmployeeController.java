@@ -31,7 +31,7 @@ class EmployeeController {
 	}
 
 	@PostMapping
-	public ResponseEntity<Employee> createEmployee() {
+	public ResponseEntity<String> createEmployee() {
 		// @Valid @RequestBody Employee employee, BindingResult result
 		// if (result.hasErrors()) {
 		// throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Validation errors");
@@ -45,16 +45,17 @@ class EmployeeController {
 		employee.setTipoContrato("Full-time");
 		employee.setListaDeProyectos("Project A, Project B");
 
-		// Guardar el empleado en el repositorio
-		Employee savedEmployee = employeeRepository.save(employee);
+		// // Guardar el empleado en el repositorio
+		//// Employee savedEmployee = employeeRepository.save(employee);
 
 		// Devolver la respuesta con el estado 201 Created y la URI del nuevo recurso
-		return ResponseEntity
-			.created(ServletUriComponentsBuilder.fromCurrentRequest()
-				.path("/{id}")
-				.buildAndExpand(savedEmployee.getId())
-				.toUri())
-			.body(savedEmployee);
+		// return ResponseEntity
+		// .created(ServletUriComponentsBuilder.fromCurrentRequest()
+		// .path("/{id}")
+		// .buildAndExpand(savedEmployee.getId())
+		// .toUri())
+		// .body(savedEmployee);
+		return ResponseEntity.ok("OK");
 	}
 
 	// @GetMapping("/{id}")

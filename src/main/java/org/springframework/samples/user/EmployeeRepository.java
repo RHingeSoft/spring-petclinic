@@ -19,6 +19,10 @@ public interface EmployeeRepository extends Repository<Employee, Integer> {
 	@Transactional(readOnly = true)
 	Optional<Employee> findById(@Param("id") Integer id);
 
+	/**
+	 * Save a {@link User} to the data store, either inserting or updating it.
+	 * @param user the {@link User} to save
+	 */
 	Employee save(Employee employee);
 
 	@Query("SELECT employee FROM Employee employee")

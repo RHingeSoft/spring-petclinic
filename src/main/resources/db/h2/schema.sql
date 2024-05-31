@@ -83,7 +83,7 @@ CREATE TABLE employees (
   first_name VARCHAR(30),
   last_name  VARCHAR(30),
   cargo VARCHAR(30),
-  salario_base INTEGER(32),
+  salario_base INTEGER,
   tipo_contrato VARCHAR(100),
   lista_de_proyectos VARCHAR(255)
 );
