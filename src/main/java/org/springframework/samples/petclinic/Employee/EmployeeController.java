@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.samples.petclinic.utils.JsonFileHandler;
 import jakarta.validation.Valid;
+import java.util.stream.Collectors;
 
 import java.io.IOException;
 import java.util.List;
@@ -84,7 +85,33 @@ class EmployeeController {
 		}
 	}
 
-	@DeleteMapping("/{id}")
+	@GetMapping("/list")
+	public ResponseEntity<List<Map<String, Object>>> listEmployees(
+			@RequestParam(value = "name", required = false) String name) {
+		try {
+			List<Map<String, Object>> employees = jsonFileHandler.readFile(filePath);
+			List<Map<String, Object>> filteredEmployees;
+
+			if (name != null) {
+				// Filtrar empleados por nombre
+				filteredEmployees = employees.stream()
+					.filter(e -> e.get("name").toString().equalsIgnoreCase(name))
+					.collect(Collectors.toList());
+			}
+			else {
+				// Devolver todos los empleados si no se proporciona un nombre para
+				// filtrar
+				filteredEmployees = employees;
+			}
+
+			return ResponseEntity.ok(filteredEmployees);
+		}
+		catch (IOException e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error reading from file", e);
+		}
+	}
+
+	@DeleteMapping("/list/{id}")
 	public ResponseEntity<Void> deleteEmployee(@PathVariable Integer id) {
 		try {
 			List<Map<String, Object>> employees = jsonFileHandler.readFile(filePath);
