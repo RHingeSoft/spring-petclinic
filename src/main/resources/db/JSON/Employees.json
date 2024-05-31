@@ -1,12 +1,1 @@
-[
-    {
-        "username": "VARCHAR(50)",
-        "first_name": "VARCHAR(30)",
-        "last_name": "VARCHAR(30)",
-        "cargo": "VARCHAR(30)",
-        "salario_base": "FLOAT(32)",
-        "tipo_contrato": "VARCHAR(100)",
-        "lista_de_proyectos": "VARCHAR(255)",
-        "id": 2
-    }
-]
+[{"first_name":"Diego","last_name":"Fernando Santana","cargo":"ddddddd","salario_base":220,"tipo_contrato":"a ratos","lista_de_proyectos":"lista\n","id":1},{"first_name":"Diego","last_name":"Fernando Santana","cargo":"trabajador","salario_base":18,"tipo_contrato":"dd","lista_de_proyectos":"proyectos","id":2}]
